@@ -1,0 +1,134 @@
+{
+  "1": {
+    "class_type": "UnetLoaderGGUF",
+    "inputs": {
+      "unet_name": "qwen-image-2.1-UC-Q8_0.gguf"
+    },
+    "_meta": {
+      "title": "Q8 diffusion model"
+    }
+  },
+  "2": {
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "qwen3vl_8b_int8_convrot.safetensors",
+      "type": "qwen_image",
+      "device": "cpu"
+    },
+    "_meta": {
+      "title": "Text + vision encoder on CPU"
+    }
+  },
+  "3": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "qwen_image_2.1_vae_bf16.safetensors"
+    },
+    "_meta": {
+      "title": "Qwen Image 2.1 VAE"
+    }
+  },
+  "4": {
+    "class_type": "TextEncodeQwenImage21",
+    "inputs": {
+      "prompt": "An editorial photograph of a ceramic teapot on a walnut table beside a window. Soft morning light, subtle steam, detailed glaze, natural colors, crisp focus on the teapot.",
+      "negative_prompt": "",
+      "resolution": 1024,
+      "clip": [
+        "2",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Write your prompt / edit instruction here"
+    }
+  },
+  "5": {
+    "class_type": "QwenImage21Cache",
+    "inputs": {
+      "device": "cpu",
+      "dtype": "default",
+      "model": [
+        "1",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Lossless prefix cache in system RAM"
+    }
+  },
+  "6": {
+    "class_type": "EmptyLatentImage",
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    },
+    "_meta": {
+      "title": "Output size: start at 1024 x 1024"
+    }
+  },
+  "7": {
+    "class_type": "KSampler",
+    "inputs": {
+      "seed": 42,
+      "steps": 40,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1.0,
+      "model": [
+        "5",
+        0
+      ],
+      "positive": [
+        "4",
+        0
+      ],
+      "negative": [
+        "4",
+        1
+      ],
+      "latent_image": [
+        "6",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Quality: 40 steps, CFG 1"
+    }
+  },
+  "8": {
+    "class_type": "VAEDecodeTiled",
+    "inputs": {
+      "tile_size": 512,
+      "overlap": 64,
+      "temporal_size": 64,
+      "temporal_overlap": 8,
+      "samples": [
+        "7",
+        0
+      ],
+      "vae": [
+        "3",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Tiled decode to save VRAM"
+    }
+  },
+  "9": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "filename_prefix": "Qwen21/text",
+      "images": [
+        "8",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Save PNG with workflow metadata"
+    }
+  }
+}
